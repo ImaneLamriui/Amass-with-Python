@@ -1,35 +1,50 @@
->....                                                                                                                                                             
-        if pd != h:
-            if pd not in G:
-                G.add_node(pd, label=pd, group='parent')
-            G.add_edge(h, pd, relation='parent')
+#!/usr/bin/env python3
+"""
+build_graph_from_combined.py
+Genera un grafo interactivo (HTML) a partir de una lista de subdominios.
+Uso:
+  python build_graph_from_combined.py data/combined.txt --out output/grafo.html
+"""
 
-    # construir red PyVis
-    net = Network(height='800px', width='100%')
+import argparse
+import networkx as nx
+from pyvis.network import Network
+
+def main():
+    parser = argparse.ArgumentParser(description="Crear grafo de subdominios con PyVis")
+    parser.add_argument("input", help="Archivo con subdominios (uno por línea)")
+    parser.add_argument("--out", default="output/grafo.html", help="Archivo HTML de salida")
+    args = parser.parse_args()
+
+    G = nx.Graph()
+
+    with open(args.input) as f:
+        for line in f:
+            host = line.strip().lower()
+            if not host or "." not in host:
+                continue
+            parts = host.split(".")
+            if len(parts) < 2:
+                continue
+            parent = ".".join(parts[-2:])  # dominio padre (ej: example.com)
+            G.add_node(host)
+            if parent != host:
+                G.add_node(parent)
+                G.add_edge(host, parent)
+
+    # Crear visualización
+    net = Network(height="800px", width="100%")
     net.from_nx(G)
 
-    # estilo sencillo: tamaño por grado, color por tipo
-    for n in net.nodes:
-        nid = n['id']
-        grp = G.nodes[nid].get('group','host')
-        deg = G.degree[nid]
-        n['title'] = f"{nid} (degree: {deg})"
-        n['value'] = deg + 1
-        if grp == 'parent':
-            n['color'] = '#ffcc00'
-            n['size'] = 18
-        else:
-            n['color'] = '#6cace4'
-            n['size'] = 12 + min(deg,10)
+    # Colores simples
+    for node in net.nodes:
+        deg = G.degree[node['id']]
+        node['value'] = deg + 1
+        node['color'] = "#6cace4" if "." in node['id'] else "#ffcc00"
+        node['title'] = f"{node['id']} (conexiones: {deg})"
 
-    # Escribir HTML sin el modo "notebook" (evita el bug que dio error)
     net.write_html(args.out, notebook=False)
-    print("[+] Grafo generado:", args.out)
+    print(f"[+] Grafo generado en: {args.out}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-PY
-
-chmod +x build_graph_from_combined.py
-echo "Script sobrescrito y marcado ejecutable."
-Script sobrescrito y marcado ejecutable.
