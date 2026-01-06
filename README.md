@@ -1,5 +1,7 @@
 # De la enumeración a la visualización — Amass + Python (demo reproducible)
 
+<img src="amass.png">
+
 **Resumen**
 
 Este repositorio es un mini-pipeline para convertir listas de subdominios en un grafo interactivo HTML usando **NetworkX + PyVis**. Está pensado para demostraciones, formación y documentación de pipelines de enumeración de forma **ética** y reproducible.
